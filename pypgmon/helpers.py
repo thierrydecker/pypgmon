@@ -19,5 +19,5 @@ def conf_app():
     Raises:
 
     """
-    configuration_done = True
-    return configuration_done
+    conf_done = True
+    return conf_done
