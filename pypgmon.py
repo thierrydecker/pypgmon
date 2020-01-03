@@ -1,4 +1,10 @@
-"""PyPgMon main module"""
+"""PyPgMon main module.
+
+Copyright (c) 2020 Thierry P.G. DECKER
+All Rights Reserved.
+Released under the MIT license
+
+"""
 
 
 def main():
