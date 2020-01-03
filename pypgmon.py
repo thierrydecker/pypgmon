@@ -6,10 +6,15 @@ Released under the MIT license
 
 """
 
+import sys
+
+from pypgmon.helpers import conf_app
+
 
 def main():
     """Entry point of the application"""
-    pass
+    if not conf_app():
+        sys.exit(1)
 
 
 if __name__ == '__main__':
