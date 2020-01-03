@@ -7,7 +7,7 @@ Released under the MIT license
 """
 
 
-def configure_app():
+def conf_app():
     """PyPgMon configuration
 
     Args:
