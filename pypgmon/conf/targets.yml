@@ -1,0 +1,50 @@
+#
+# Targets configuration
+#
+
+scheduler:
+
+  max_workers: 5
+  default_interval: 1
+
+#
+# Clusters to monitor
+#
+# (Clusters are monitored using pg_stat_database)
+#
+clusters:
+
+  cluster_01:
+
+    descrription: 'First cluster to monitor'
+    host: 'localhost'
+    port: '5432'
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'my_super_secret_password'
+    interval: 1
+
+#
+# Databases to monitor
+#
+databases:
+
+  database_01:
+
+    description: 'First database to monitor'
+    host: 'localhost'
+    port: '5432'
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'my_super_secret_password'
+    interval: 1
+
+  database_02:
+
+    description: 'Second database to monitor'
+    host: 'localhost'
+    port: '5432'
+    dbname: 'lod'
+    user: 'postgres'
+    password: 'my_super_secret_password'
+    interval: 1
