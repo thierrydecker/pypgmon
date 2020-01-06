@@ -23,7 +23,7 @@ def main():
         sys.exit(1)
     logger = logging.getLogger('pypgmon')
     logger.info(f'Starting...')
-    scheduler = create_scheduler(configuration=conf)
+    scheduler = create_scheduler(conf=conf)
     if scheduler is None:
         sys.exit(1)
     scheduler.start()
