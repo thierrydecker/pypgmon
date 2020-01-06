@@ -12,6 +12,7 @@ import sys
 from pypgmon.helpers import check_app_conf
 from pypgmon.helpers import infinite_loop
 from pypgmon.helpers import parse_arguments
+from pypgmon.jobs import create_scheduler
 
 
 def main():
@@ -22,8 +23,15 @@ def main():
         sys.exit(1)
     logger = logging.getLogger('pypgmon')
     logger.info(f'Starting...')
+    scheduler = create_scheduler(conf=conf)
+    if scheduler is None:
+        sys.exit(1)
+    scheduler.start()
     logger.info(f'Started')
     infinite_loop()
+    logger.info(f'Stopping...')
+    scheduler.remove_all_jobs()
+    scheduler.shutdown()
     logger.info(f'Stopped')
 
 
