@@ -7,7 +7,7 @@
 #
 scheduler:
 
-  max_workers: 5
+  max_workers: 20
 
 #
 # InfluxDB
@@ -35,7 +35,17 @@ clusters:
     dbname: 'postgres'
     user: 'postgres'
     password: 'my_super_secret_password'
-    interval: 1
+    interval: 5
+
+  cluster_02:
+
+    description: 'Second cluster to monitor'
+    host: 'localhost'
+    port: 5432
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'my_super_secret_password'
+    interval: 5
 
 #
 # Databases to monitor
@@ -50,7 +60,7 @@ databases:
     dbname: 'postgres'
     user: 'postgres'
     password: 'my_super_secret_password'
-    interval: 1
+    interval: 5
 
   database_02:
 
@@ -60,4 +70,4 @@ databases:
     dbname: 'lod'
     user: 'postgres'
     password: 'my_super_secret_password'
-    interval: 1
+    interval: 5
