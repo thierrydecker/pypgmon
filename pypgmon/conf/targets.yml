@@ -5,7 +5,6 @@
 scheduler:
 
   max_workers: 5
-  default_interval: 1
 
 #
 # Clusters to monitor
@@ -16,9 +15,9 @@ clusters:
 
   cluster_01:
 
-    descrription: 'First cluster to monitor'
+    description: 'First cluster to monitor'
     host: 'localhost'
-    port: '5432'
+    port: 5432
     dbname: 'postgres'
     user: 'postgres'
     password: 'my_super_secret_password'
@@ -33,7 +32,7 @@ databases:
 
     description: 'First database to monitor'
     host: 'localhost'
-    port: '5432'
+    port: 5432
     dbname: 'postgres'
     user: 'postgres'
     password: 'my_super_secret_password'
@@ -43,7 +42,7 @@ databases:
 
     description: 'Second database to monitor'
     host: 'localhost'
-    port: '5432'
+    port: 5432
     dbname: 'lod'
     user: 'postgres'
     password: 'my_super_secret_password'
