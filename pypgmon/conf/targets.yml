@@ -2,9 +2,23 @@
 # Targets configuration
 #
 
+#
+# Scheduler
+#
 scheduler:
 
   max_workers: 5
+
+#
+# InfluxDB
+#
+influxdb:
+
+  host: 'localhost'
+  port: 8086
+  dbname: 'pypgmon'
+  user: 'pypgmon'
+  password: 'my_super_secret_password'
 
 #
 # Clusters to monitor
