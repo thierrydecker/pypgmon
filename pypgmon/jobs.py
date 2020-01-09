@@ -6,94 +6,8 @@ Released under the MIT license
 
 """
 import logging
-import random
-import time
 
-from apscheduler.schedulers.background import BackgroundScheduler
-
-
-def create_scheduler(conf):
-    """Start scheduler
-
-    Args:
-        conf: A valid configuration dictionnary
-
-    Returns:
-        A scheduler or None
-
-    Raises:
-
-    """
-    logger = logging.getLogger(__name__)
-    try:
-        max_workers = conf['scheduler']['max_workers']
-        scheduler = BackgroundScheduler(
-                executors={
-                    'default':
-                        {
-                            'type': 'threadpool',
-                            'max_workers': max_workers,
-                        },
-                }
-        )
-        logger.info(f'Scheduler created for {max_workers} workers')
-        logger.info(f'Adding clusters targets...')
-        for cluster in conf['clusters']:
-            description = conf['clusters'][cluster]['description']
-            host = conf['clusters'][cluster]['host']
-            port = conf['clusters'][cluster]['port']
-            dbname = conf['clusters'][cluster]['dbname']
-            user = conf['clusters'][cluster]['user']
-            password = conf['clusters'][cluster]['password']
-            seconds = conf['clusters'][cluster]['interval']
-            scheduler.add_job(
-                    pg_stat_database,
-                    'interval',
-                    kwargs={
-                        'cluster': cluster,
-                        'description': description,
-                        'host': host,
-                        'port': port,
-                        'dbname': dbname,
-                        'user': user,
-                        'password': password,
-                    },
-                    name=cluster,
-                    seconds=seconds,
-            )
-            logger.info(f'Cluster target {cluster} added')
-        logger.info(f'Clusters targets added')
-        logger.info(f'Adding databases targets...')
-        for database in conf['databases']:
-            description = conf['databases'][database]['description']
-            host = conf['databases'][database]['host']
-            port = conf['databases'][database]['port']
-            dbname = conf['databases'][database]['dbname']
-            user = conf['databases'][database]['user']
-            password = conf['databases'][database]['password']
-            seconds = conf['databases'][database]['interval']
-            scheduler.add_job(
-                    pg_stat_all_tables,
-                    'interval',
-                    kwargs={
-                        'database': database,
-                        'description': description,
-                        'host': host,
-                        'port': port,
-                        'dbname': dbname,
-                        'user': user,
-                        'password': password,
-                    },
-                    name=database,
-                    seconds=seconds,
-            )
-            logger.info(f'Database target {database} added')
-        logger.info(f'Databases targets added')
-    except ValueError as e:
-        logger = logging.getLogger(__name__)
-        scheduler = None
-        logger.error(f'Creating the scheduler, {e}')
-    return scheduler
+import psycopg2
 
 
 def pg_stat_database(
@@ -108,13 +22,13 @@ def pg_stat_database(
     """pg_stat_database job
 
     Args:
-        cluster:
-        description:
-        host:
-        port:
-        dbname:
-        user:
-        password:
+        cluster: Cluster's key
+        description: Cluster's description
+        host: Cluster's hostname or ip address
+        port:Cluster's port
+        dbname: Cluster's dbname
+        user: Cluster's user
+        password: Cluster's user password
 
     Returns:
 
@@ -123,8 +37,91 @@ def pg_stat_database(
     """
     logger = logging.getLogger(__name__)
     logger.debug(f'Polling cluster {cluster} ({description})...')
-    time.sleep(random.randint(0, 4))
-    logger.info(f'Cluster {cluster} ({description}) polled')
+    try:
+        with psycopg2.connect(
+                host=host,
+                port=port,
+                dbname=dbname,
+                user=user,
+                password=password
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                        """
+                        SELECT
+                            datname,
+                            numbackends,
+                            xact_commit,
+                            xact_rollback,
+                            blks_read,
+                            blks_hit,
+                            tup_returned,
+                            tup_fetched,
+                            tup_inserted,
+                            tup_updated,
+                            tup_deleted,
+                            conflicts,
+                            temp_files,
+                            temp_bytes,
+                            deadlocks,
+                            blk_read_time,
+                            blk_write_time 
+                        FROM
+                            pg_stat_database
+                        """
+                )
+                points = []
+                for row in cursor.fetchall():
+                    measurement = 'pg_stat_database'
+                    datname = row[0]
+                    numbackends = row[1]
+                    xact_commit = row[2]
+                    xact_rollback = row[3]
+                    blks_read = row[4]
+                    blks_hit = row[5]
+                    tup_returned = row[6]
+                    tup_fetched = row[7]
+                    tup_inserted = row[8]
+                    tup_updated = row[9]
+                    tup_deleted = row[10]
+                    conflicts = row[11]
+                    temp_files = row[12]
+                    temp_bytes = row[13]
+                    deadlocks = row[14]
+                    blk_read_time = row[15]
+                    blk_write_time = row[16]
+                    points.append(
+                            {
+                                'measurement': measurement,
+                                'tags': {
+                                    'cluster': cluster + ':' + str(port),
+                                    'datname': datname,
+                                },
+                                'fields': {
+                                    'numbackends': numbackends,
+                                    'xact_commit': xact_commit,
+                                    'xact_rollback': xact_rollback,
+                                    'blks_read': blks_read,
+                                    'blks_hit': blks_hit,
+                                    'tup_returned': tup_returned,
+                                    'tup_fetched': tup_fetched,
+                                    'tup_inserted': tup_inserted,
+                                    'tup_updated': tup_updated,
+                                    'tup_deleted': tup_deleted,
+                                    'conflicts': conflicts,
+                                    'temp_files': temp_files,
+                                    'temp_bytes': temp_bytes,
+                                    'deadlocks': deadlocks,
+                                    'blk_read_time': blk_read_time,
+                                    'blk_write_time': blk_write_time,
+                                }
+                            },
+                    )
+        logger.debug(points)
+        logger.info(f'Cluster {cluster} ({description}) polled')
+    except psycopg2.OperationalError as e:
+        logger.error(f'Could not poll cluster {host}:{port}')
+        logger.error({e})
 
 
 def pg_stat_all_tables(
@@ -154,5 +151,16 @@ def pg_stat_all_tables(
     """
     logger = logging.getLogger(__name__)
     logger.debug(f'Polling database {database} ({description})...')
-    time.sleep(random.randint(0, 4))
-    logger.info(f'Database {database} ({description}) polled')
+    try:
+        conn = psycopg2.connect(
+                host=host,
+                port=port,
+                dbname=dbname,
+                user=user,
+                password=password,
+        )
+        conn.close()
+        logger.info(f'Database {database} ({description}) polled')
+    except psycopg2.OperationalError as e:
+        logger.error(f'Could not poll database {host}:{port}')
+        logger.error({e})

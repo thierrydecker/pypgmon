@@ -12,7 +12,7 @@ import sys
 from pypgmon.helpers import check_app_conf
 from pypgmon.helpers import infinite_loop
 from pypgmon.helpers import parse_arguments
-from pypgmon.jobs import create_scheduler
+from pypgmon.scheduler import create_scheduler
 
 
 def main():
