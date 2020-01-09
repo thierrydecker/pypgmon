@@ -1,3 +1,4 @@
 /pypgmon/log/
 /.idea/
 /pypgmon/__pycache__/
+/pypgmon/conf/test_targets.yml

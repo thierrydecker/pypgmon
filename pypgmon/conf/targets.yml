@@ -50,6 +50,8 @@ clusters:
 #
 # Databases to monitor
 #
+# (Databases are monitored using pg_stat_all_tables)
+#
 databases:
 
   database_01:
