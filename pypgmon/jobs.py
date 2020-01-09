@@ -45,8 +45,6 @@ def pg_stat_database(
                 user=user,
                 password=password
         ) as connection:
-            logger.debug(
-                    f'Connected to [{dbname}] database with user [{user}]')
             with connection.cursor() as cursor:
                 cursor.execute(
                         """
@@ -153,7 +151,6 @@ def pg_stat_all_tables(
     """
     logger = logging.getLogger(__name__)
     logger.debug(f'Polling database {database} ({description})...')
-    conn = None
     try:
         conn = psycopg2.connect(
                 host=host,
