@@ -1,0 +1,84 @@
+#
+# Targets configuration
+#
+
+#
+# Scheduler
+#
+scheduler:
+
+  max_workers: 20
+
+#
+# Clusters to monitor
+#
+# (Clusters are monitored using pg_stat_database)
+#
+clusters:
+
+  cl_01:
+
+    description: 'pypgmon.cethun.com:5432'
+    host: '192.168.207.201'
+    port: 5432
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
+
+  cl_02:
+
+    description: 'pypgmon.cethun.com:5433'
+    host: '192.168.207.202'
+    port: 5433
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
+
+  cl_03:
+
+    description: 'pypgmon.cethun.com:5434'
+    host: '192.168.207.203'
+    port: 5434
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
+
+#
+# Databases to monitor
+#
+# (Databases are monitored using pg_stat_all_tables)
+#
+databases:
+
+  db_01:
+
+    description: 'POSTGRES on pypgmon.cethun.com:5432'
+    host: '192.168.207.201'
+    port: 5432
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
+
+  db_02:
+
+    description: 'POSTGRES on pypgmon.cethun.com:5433'
+    host: '192.168.207.202'
+    port: 5433
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
+
+  db_03:
+
+    description: 'POSTGRES on pypgmon.cethun.com:5434'
+    host: '192.168.207.203'
+    port: 5434
+    dbname: 'postgres'
+    user: 'postgres'
+    password: 'zvxmhwfn'
+    interval: 1
