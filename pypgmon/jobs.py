@@ -5,6 +5,8 @@ All Rights Reserved.
 Released under the MIT license
 
 """
+
+import json
 import logging
 
 import psycopg2
@@ -94,7 +96,7 @@ def pg_stat_database(
                             {
                                 'measurement': measurement,
                                 'tags': {
-                                    'cluster': cluster + ':' + str(port),
+                                    'cluster': host + ':' + str(port),
                                     'datname': datname,
                                 },
                                 'fields': {
@@ -118,6 +120,7 @@ def pg_stat_database(
                             },
                     )
         logger.debug(points)
+        print(json.dumps(points, indent=4))
         logger.info(f'Cluster {cluster} ({description}) polled')
     except psycopg2.OperationalError as e:
         logger.error(f'Could not poll cluster {host}:{port}')
@@ -152,15 +155,76 @@ def pg_stat_all_tables(
     logger = logging.getLogger(__name__)
     logger.debug(f'Polling database {database} ({description})...')
     try:
-        conn = psycopg2.connect(
+        with psycopg2.connect(
                 host=host,
                 port=port,
                 dbname=dbname,
                 user=user,
-                password=password,
-        )
-        conn.close()
-        logger.info(f'Database {database} ({description}) polled')
+                password=password
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                        """
+                        SELECT
+                            schemaname,
+                            relname,
+                            seq_scan,
+                            seq_tup_read,
+                            idx_scan,
+                            idx_tup_fetch,
+                            n_tup_ins,
+                            n_tup_upd,
+                            n_tup_del,
+                            n_tup_hot_upd,
+                            n_live_tup,
+                            n_dead_tup,
+                            n_mod_since_analyze 
+                        FROM
+                            pg_stat_all_tables
+                        """
+                )
+                points = []
+                for row in cursor.fetchall():
+                    measurement = 'pg_stat_all_tables'
+
+                    schemaname = row[0]
+                    relname = row[1]
+                    seq_scan = row[2]
+                    seq_tup_read = row[3]
+                    idx_scan = row[4]
+                    idx_tup_fetch = row[5]
+                    n_tup_ins = row[6]
+                    n_tup_upd = row[7]
+                    n_tup_del = row[8]
+                    n_tup_hot_upd = row[9]
+                    n_live_tup = row[10]
+                    n_dead_tup = row[11]
+                    points.append(
+                            {
+                                'measurement': measurement,
+                                'tags': {
+                                    'cluster': host + ':' + str(port),
+                                    'dbname': dbname,
+                                    'schemaname': schemaname,
+                                    'relname': relname,
+                                },
+                                'fields': {
+                                    'seq_scan': seq_scan,
+                                    'seq_tup_read': seq_tup_read,
+                                    'idx_scan': idx_scan,
+                                    'idx_tup_fetch': idx_tup_fetch,
+                                    'n_tup_ins': n_tup_ins,
+                                    'n_tup_upd': n_tup_upd,
+                                    'n_tup_del': n_tup_del,
+                                    'n_tup_hot_upd': n_tup_hot_upd,
+                                    'n_live_tup': n_live_tup,
+                                    'n_dead_tup': n_dead_tup,
+                                }
+                            },
+                    )
+        logger.debug(points)
+        print(json.dumps(points, indent=4))
+        logger.info(f'Database {dbname} ({description}) polled')
     except psycopg2.OperationalError as e:
-        logger.error(f'Could not poll database {host}:{port}')
+        logger.error(f'Could not poll database {dbname} on {host}:{port}')
         logger.error({e})
